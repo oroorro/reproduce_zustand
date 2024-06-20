@@ -10,7 +10,6 @@ const WrapWithStore = forwardRef<HTMLDivElement, PropsWithChildren<{}>>(({ child
   if (isWrapped) {
     return <>{children}</>;  // Just render children if already wrapped
   }
-  console.log("WrapWithStore", ref);
   return (
     <ReactFlowProvider>
         {children}

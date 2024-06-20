@@ -8,7 +8,6 @@ export default function Flow(){
 
     const isWrapped = useContext(StoreContext);
 
-    console.log("isWrapped", isWrapped);
     if(isWrapped){
         return(
             <div>

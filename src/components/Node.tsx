@@ -47,7 +47,7 @@ const NodeWrapper = (
          
         useEffect(()=>{
 
-          console.log(ArrayListManager)
+          console.log("ArrayListManager updated in useEffect", ArrayListManager)
           if(ArrayListManager?.currentTimeFrameIndex === 0){
 
           }else if(ArrayListManager?.currentTimeFrameIndex > 0){
@@ -131,7 +131,7 @@ const NodeWrapper = (
 
         useEffect(()=>{
 
-            console.log("Relation in Iterator Length", id, "  ", contentForIterLength);
+            console.log("Relation in Iterator Length using Selector", id, "  ", contentForIterLength);
         },[contentForIterLength])
 
         return(

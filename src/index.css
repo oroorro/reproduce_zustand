@@ -16,7 +16,7 @@ code {
 .Node{
    margin-top: 20px;
    margin-left: 20px;
-   width: 300px;
-   height: 200px;
+   width: 200px;
+   height: 100px;
    background-color: tomato;
 }
