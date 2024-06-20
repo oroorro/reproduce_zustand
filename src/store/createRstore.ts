@@ -19,26 +19,34 @@ const createRStore = () => {
     
         },
         setRelation:(payload:any)=>{
-            const {relations} = get();
+            //const {relations} = get();
     
 
-            const relation = relations?.get("3-Iterator-Relation");
+            // const relation = relations?.get("3-Iterator-Relation");
         
-            if(!relation) {
-                const relation:Relation = {
-                    nodeId: "nodeId-2",
-                    contentForIter: [],
-                }
+            // if(!relation) {
+            //     const relation:Relation = {
+            //         nodeId: "nodeId-2",
+            //         contentForIter: [],
+            //     }
                
-                relations?.set(`3-Iterator-Relation`,relation);
+            //     relations?.set(`3-Iterator-Relation`,relation);
+            //     //relations?.set(`5`,relation);
 
-                relation!.contentForIter = (payload as string[]);
-            }else{
-                relation!.contentForIter = (payload as string[]);
-            }
+            //     relation!.contentForIter = (payload as string[]);
+            //     console.log("Relation in store", relations , relation?.contentForIter);
+            // }else{
+            //     relation!.contentForIter = (payload as string[]);
+            //     console.log("Relation in store", relations , relation?.contentForIter);
+            // }
 
+            const { relations } = get();
+            const newRelations = new Map(relations); // Creating a new Map to ensure reference change
+            const relation = newRelations.get("3-Iterator-Relation") || { nodeId: "nodeId-2", contentForIter: [] };
+            relation.contentForIter = payload;
+            newRelations.set("3-Iterator-Relation", relation);
+            set({ relations: newRelations });
             
-            console.log("Relation in store", relation , relation?.contentForIter);
     
         },
 

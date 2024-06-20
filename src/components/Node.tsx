@@ -106,18 +106,19 @@ const NodeWrapper = (
     }
     else if(type === 'IteratorNode'){
 
-        const selector = (s: ReactFlowState) => ({
-            Relation: s.relations?.get("3-Iterator-Relation")!.contentForIter.length,
-        });
+        const selector = (s: ReactFlowState) => {
+            console.log('Current relations:', s.relations);
+            const relation = s.relations?.get("3-Iterator-Relation");
+            return { Relation: relation ? relation.contentForIter.length : 0 };
+        };
+
+        const {Relation} = useStore(selector, shallow);
+
+        useEffect(()=>{
+
+            console.log("Relation in Iterator", id, "  ", Relation);
     
-
-        // const {Relation} = useStore(selector, shallow);
-
-        // useEffect(()=>{
-
-        //     console.log("Relation in Iterator", id, "  ", Relation);
-    
-        // },[Relation])
+        },[Relation])
 
         const lengthEqualityFn = (prevLength: number, nextLength: number) => {
             console.log("Relation", prevLength, nextLength)
@@ -126,13 +127,15 @@ const NodeWrapper = (
     
         const contentForIterLength = useStore(
             (state) => (state.relations?.get("3-Iterator-Relation")?.contentForIter.length as number),
-            lengthEqualityFn
+            
         );
+
 
         useEffect(()=>{
 
             console.log("Relation in Iterator Length using Selector", id, "  ", contentForIterLength);
         },[contentForIterLength])
+
 
         return(
             <div className={`node_${id} IteratorNode Node`}>
@@ -145,6 +148,17 @@ const NodeWrapper = (
         )
     }
     else{
+
+        const contentForIterTest = useStore(
+            (state) => (state.relations?.get(id)),
+            
+        );
+
+        useEffect(()=>{
+
+            console.log("Relation in Default using Selector", id, "  ", contentForIterTest);
+        },[contentForIterTest])
+
         return(
             <div className={`node_${id} defaultNode Node`}>
                 {id}
