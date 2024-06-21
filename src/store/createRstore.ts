@@ -46,6 +46,11 @@ const createRStore = () => {
 
             console.log("store", `${payload.id}-${payload.type}-Relation`);
 
+            const { relations } = get();
+            const ret = relations?.get(`${payload.id}-${payload.type}-Relation`)
+            if(!ret && payload.type) set({newlyAddedId: payload.id})
+
+
             if(!payload.type){
                 const { relations } = get();
                 const newRelations = new Map(relations); // Creating a new Map to ensure reference change
@@ -58,7 +63,7 @@ const createRStore = () => {
                 const { relations } = get();
                 const newRelationsTest = new Map(relations); // Creating a new Map to ensure reference change
                 const relationTest = newRelationsTest.get(`${payload.id}-${payload.type}-Relation`) || { nodeId: "nodeId-2", contentForIter: [] };
-                relationTest.contentForIter = payload;
+                relationTest.contentForIter = payload.data;
                 newRelationsTest.set(`${payload.id}-${payload.type}-Relation`, relationTest);
                 set({ relations: newRelationsTest });
                 console.log("payload typed");

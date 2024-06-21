@@ -1,11 +1,6 @@
 export type ReactFlowState = ReactFlowStore & ReactFlowActions;
 
-export type Relation = {
-    nodeId: string,
-    contentForIter: string[],
-}
-    
-export type Relations = Map<string, Relation>;
+
 
 
 export type ReactFlowActions= {
@@ -21,3 +16,9 @@ export type ReactFlowStore = {
     newlyAddedId: string | null;
 
 }
+export type Relations = Map<string, Relation>;
+export type Relation = {
+    nodeId: string,
+    contentForIter: string[],
+}
+    
