@@ -18,6 +18,10 @@ const createRStore = () => {
             return (relations?.get(nodeId)! as Relation);
     
         },
+        createRelation:(payload:any)=>{
+            const { relations } = get();
+            relations?.set(`${payload.id}-${payload.type}-Relation`,payload.data);
+        },
         setRelation:(payload:any)=>{
             //const {relations} = get();
     
@@ -40,12 +44,28 @@ const createRStore = () => {
             //     console.log("Relation in store", relations , relation?.contentForIter);
             // }
 
-            const { relations } = get();
-            const newRelations = new Map(relations); // Creating a new Map to ensure reference change
-            const relation = newRelations.get("3-Iterator-Relation") || { nodeId: "nodeId-2", contentForIter: [] };
-            relation.contentForIter = payload;
-            newRelations.set("3-Iterator-Relation", relation);
-            set({ relations: newRelations });
+            console.log("store", `${payload.id}-${payload.type}-Relation`);
+
+            if(!payload.type){
+                const { relations } = get();
+                const newRelations = new Map(relations); // Creating a new Map to ensure reference change
+                const relation = newRelations.get("3-Iterator-Relation") || { nodeId: "nodeId-2", contentForIter: [] };
+                relation.contentForIter = payload;
+                newRelations.set("3-Iterator-Relation", relation);
+                set({ relations: newRelations });
+                console.log("payload typeless");
+            }else{
+                const { relations } = get();
+                const newRelationsTest = new Map(relations); // Creating a new Map to ensure reference change
+                const relationTest = newRelationsTest.get(`${payload.id}-${payload.type}-Relation`) || { nodeId: "nodeId-2", contentForIter: [] };
+                relationTest.contentForIter = payload;
+                newRelationsTest.set(`${payload.id}-${payload.type}-Relation`, relationTest);
+                set({ relations: newRelationsTest });
+                console.log("payload typed");
+            }
+            
+            
+         
             
     
         },

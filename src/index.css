@@ -20,3 +20,7 @@ code {
    height: 100px;
    background-color: tomato;
 }
+
+.defaultNode{
+  background-color:wheat;
+}

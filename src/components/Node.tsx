@@ -21,18 +21,23 @@ type ArrayListManager = {
     TimeFrameArray: string[][],
 }
 
-const NodeWrapper = (
-  { id,
-   data,
-   type
-  }
-:NodeProps) =>{
+type IteratorManager = {
+    relationCount: number,
+    managingRelations: string[],
+}
+
+const NodeWrapper = ({ 
+    id,
+    data,
+    type
+  }:NodeProps) =>{
     
-    console.log(`Node ${id}-${type}`);
+    console.log(`<Node ${id}-${type}> rendered`);
+    const store = useStoreApi();
     
     if ( type === 'ArrayListNode') {
-
-       const store = useStoreApi();
+        const {setRelation} = store.getState();
+      
         
        const initArrayListManager = {
         currentTimeFrameIndex: -1,
@@ -49,9 +54,23 @@ const NodeWrapper = (
 
           console.log("ArrayListManager updated in useEffect", ArrayListManager)
           if(ArrayListManager?.currentTimeFrameIndex === 0){
-
+            const payload = {
+                id: id,
+                type: type,
+                data: ArrayListManager.TimeFrameArray[0]
+            }
+            setRelation(payload);
           }else if(ArrayListManager?.currentTimeFrameIndex > 0){
+            //const input = contentRef.current?.innerHTML.split(" ") || [];
 
+            const payload = {
+                id: id,
+                type: type,
+                data: ArrayListManager.TimeFrameArray
+            }
+
+
+            setRelation(payload);
           }
 
         },[ArrayListManager?.currentTimeFrameIndex])
@@ -106,19 +125,64 @@ const NodeWrapper = (
     }
     else if(type === 'IteratorNode'){
 
-        const selector = (s: ReactFlowState) => {
-            console.log('Current relations:', s.relations);
-            const relation = s.relations?.get("3-Iterator-Relation");
-            return { Relation: relation ? relation.contentForIter.length : 0 };
+
+        //relationCount 
+        
+
+        const initIteratorManager:IteratorManager  = {
+            relationCount: 0,
+            managingRelations: []
+        }
+
+        const [iteratorManager, setIteratorManager] = useState<IteratorManager>(initIteratorManager);
+
+
+
+        // const selector = (s: ReactFlowState) => {
+        //     console.log('Current relations:', s.relations);
+        //     const relation = s.relations?.get("3-Iterator-Relation");
+        //     return { Relation: relation ? relation.contentForIter.length : 0 };
+        // };
+
+        // const {Relation} = useStore(selector, shallow);
+
+
+        const selectorTest = (s: ReactFlowState) => {
+           
+            const relationTest = s.relations?.get("3-ArrayListNode-Relation");
+            return { Relation: relationTest ? relationTest.contentForIter.length : 0 };
         };
 
-        const {Relation} = useStore(selector, shallow);
+        //const {Relation} = useStore(selectorTest, shallow);
+
+        const selector = (s: ReactFlowState) => {
+            console.log(`<ItertorNode id:${id}>  Current relations is`, s.relations);
+            return { relationsCount: s.relations?.size || 0 };
+        };
+
+
+        const {relationsCount} = useStore(selector, shallow);
+       
 
         useEffect(()=>{
 
-            console.log("Relation in Iterator", id, "  ", Relation);
-    
-        },[Relation])
+            console.log(`<Iterator ${id}> listening to number of relations`, relationsCount);
+            if(relationsCount != iteratorManager.relationCount){
+
+                const newlyAddedId = store.getState().newlyAddedId;
+
+                const newlyAddedRelation = store.getState().relations?.get(newlyAddedId as string);
+
+                
+
+                setIteratorManager(prev=>({
+                    ...prev,
+                    managingRelations: prev.managingRelations.push(newlyAddedId as string),
+                    relationCount: prev.relationCount++,
+                }))
+            }
+
+        },[relationsCount])
 
         const lengthEqualityFn = (prevLength: number, nextLength: number) => {
             console.log("Relation", prevLength, nextLength)
@@ -133,7 +197,7 @@ const NodeWrapper = (
 
         useEffect(()=>{
 
-            console.log("Relation in Iterator Length using Selector", id, "  ", contentForIterLength);
+            console.log(`<Iterator ${id}> Listening to 3-Iterator-Relation Length :`, contentForIterLength);
         },[contentForIterLength])
 
 
@@ -149,6 +213,9 @@ const NodeWrapper = (
     }
     else{
 
+       const {setRelation} = store.getState();
+
+
         const contentForIterTest = useStore(
             (state) => (state.relations?.get(id)),
             
@@ -156,12 +223,13 @@ const NodeWrapper = (
 
         useEffect(()=>{
 
-            console.log("Relation in Default using Selector", id, "  ", contentForIterTest);
+            console.log(`<Default ${id}> using Selector `, contentForIterTest);
         },[contentForIterTest])
 
         return(
             <div className={`node_${id} defaultNode Node`}>
                 {id}
+                <button></button>
             </div>
         )
     }
