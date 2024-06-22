@@ -1,6 +1,6 @@
 
 import { useStore, useStoreApi } from "../store/useStore"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, memo } from "react"
 import { ReactFlowState, Relation } from "../types/store"
 import { shallow } from 'zustand/shallow';
 
@@ -60,6 +60,20 @@ const NodeWrapper = ({
 
 
        const contentRef = useRef<HTMLDivElement>(null);
+
+
+       const selector = (s: ReactFlowState) => {
+            //console.log('Current update debug:', s.update);
+            const update = s.update?.get(`${id}`);
+            return { update: update ? update : 0 };
+        };
+
+        const {update} = useStore(selector);
+
+        useEffect(()=>{
+
+            console.log(`update in ${id}`, update)
+        },[update])
          
         useEffect(()=>{
 
@@ -91,17 +105,23 @@ const NodeWrapper = ({
             setRelation(payload);
           }
 
+          console.log(`<ArrayListManager ${id}> ArrayListManager debug`, ArrayListManager)
+
         },[ArrayListManager?.currentTimeFrameIndex])
  
 
 
-        const onSubmitHandler = () =>{
+        const onSubmitHandler = (event: React.MouseEvent<HTMLButtonElement>) =>{
 
 
             const {setRelation} = store.getState();
             const input = contentRef.current?.innerHTML.split(" ") || [];
 
-            setArrayListManager(prev => {
+            const wasFromCurrentNode = event.currentTarget.parentElement?.getAttribute('data-id') === id 
+
+            //input wasn't empty and different from last time? and was from current Array 
+            if(input.length > 0 && wasFromCurrentNode)
+            { setArrayListManager(prev => {
                 const newIndex = prev.currentTimeFrameIndex + 1;
                 const newArray = [...prev.TimeFrameArray];
                 if (newIndex < newArray.length) {
@@ -116,7 +136,7 @@ const NodeWrapper = ({
                 };
             });
 
-           setRelation(input);
+           setRelation(input);}
 
 
         }
@@ -131,7 +151,9 @@ const NodeWrapper = ({
         })
 
         return(
-            <div className={`node_${id} ArrayListNode Node`}>
+            <div className={`node_${id} ArrayListNode Node`}
+            data-id={id}
+            >
                 <div contentEditable ref={contentRef}>
 
                 </div>
@@ -228,11 +250,11 @@ const NodeWrapper = ({
         },[relationsCount])
 
 
-        useEffect(()=>{
+        // useEffect(()=>{
 
-            console.log("iteratorManager count has changed", iteratorManager);
+        //     console.log("iteratorManager count has changed", iteratorManager);
 
-        },[iteratorManager.relationCount])
+        // },[iteratorManager.relationCount])
 
 
         useEffect(()=>{
@@ -253,8 +275,9 @@ const NodeWrapper = ({
 
              //change managingRelations into key[nodeId]: contentLengths
 
-            if(contentLengths && contentLengths.length > 0 && iteratorManager.relationCount > 0){
-                //get Relations by key of iteratorManager.managingRelations  
+             //this if statement gets run when iteratorManager.relationCount == 0 
+            if(contentLengths && contentLengths.length > 0 && iteratorManager.managingRelations.length > 0){
+                //get Relations by key of iteratorManager.managingRelations   >> contentLengths
                 
 
                 const res:IteratorTimeFrame[] = [];
@@ -269,34 +292,52 @@ const NodeWrapper = ({
                     res.push(obj);
                 })
 
+                for (let index = 0; index < contentLengths.length; index++) {
+                    
+                    
+                }
+
+                
+
                 //get those Relations value which consists timeFrameId  
                
                 //make an object:IteratorTimeFrame  nodeId, timeFrameId 
                   //store those into iteratorManager.timeFrame   IteratorTimeFrame
                   //increase iteratorManager.currentTimeFrame by 1 
-                setIteratorManager(prev=>{
-                    const newTimeFrames = [...prev.timeFrame];
-
-                    if (!newTimeFrames[prev.currentTimeFrame]) {
-                        newTimeFrames[prev.currentTimeFrame] = [];
-                    }
-
-                    newTimeFrames[prev.currentTimeFrame] = [...newTimeFrames[prev.currentTimeFrame], ...res];
-
-                    return{
-                        ...prev,
-                        currentTimeFrame: prev.currentTimeFrame + 1,
-                        timeFrame: newTimeFrames
-                    }
-                    
-                })
-
+                
+                // if(iteratorManager.relationCount > 0)  {
+                    setIteratorManager(prev=>{
+                        const newTimeFrames = [...prev.timeFrame];
+    
+                        if (!newTimeFrames[prev.currentTimeFrame]) {
+                            newTimeFrames[prev.currentTimeFrame] = [];
+                        }
+    
+                        newTimeFrames[prev.currentTimeFrame] = [...newTimeFrames[prev.currentTimeFrame], ...res];
+    
+                        return{
+                            ...prev,
+                            currentTimeFrame: prev.currentTimeFrame + 1,
+                            timeFrame: newTimeFrames
+                        }
+                        
+                    })
+                //}
+                
+                
             }
             
 
-            console.log(`<Iterator ${id}> listening to contentLengths`, contentLengths, iteratorManager)
-        },[contentLengths])
+            
+        },[contentLengths, iteratorManager.relationCount])
 
+
+        useEffect(()=>{
+
+            // if(iteratorManager.currentTimeFrame )
+            console.log(`<Iterator ${id}> iteratorManager debug`, iteratorManager)
+
+        },[iteratorManager])
 
         //This selector and useEffect was for testing if this iterator could listen to 
         //3-Iterator-Relation or not 
@@ -318,10 +359,25 @@ const NodeWrapper = ({
         // },[contentForIterLength])
 
 
+       const onMinusHandler = () =>{
+
+        console.log("minus");
+         const {setUpdate} = store.getState()
+
+          const currentFrame = iteratorManager.timeFrame[iteratorManager.currentTimeFrame - 1];
+
+
+          setUpdate(currentFrame);
+        //   currentFrame.forEach((frame)=>{
+        //     update.set(frame.nodeId, frame.nodeTimeFrameIndex);
+        //   })
+
+       }
+
         return(
             <div className={`node_${id} IteratorNode Node`}>
                 <div>
-                    <button>-</button>
+                    <button onClick={onMinusHandler}>-</button>
                     <button>=</button>
                     <button>+</button>
                 </div>
@@ -353,4 +409,4 @@ const NodeWrapper = ({
 
 }
 
-export default NodeWrapper;
+export default memo(NodeWrapper);

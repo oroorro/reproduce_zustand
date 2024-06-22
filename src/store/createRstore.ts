@@ -1,6 +1,10 @@
 import { createWithEqualityFn } from 'zustand/traditional';
 import initialState from './initialState';
 import { ReactFlowState,Relation } from '../types/store';
+type IteratorTimeFrame = {
+    nodeId: string,
+    nodeTimeFrameIndex: number
+}
 
 
 const createRStore = () => {
@@ -82,6 +86,13 @@ const createRStore = () => {
          
             }
     
+        },
+        setUpdate: (frame: IteratorTimeFrame[]) => {
+            const update = new Map(get().update); // Clone the current Map
+            frame.forEach((item) => {
+                update.set(item.nodeId, item.nodeTimeFrameIndex);
+            });
+            set({ update });
         },
 
     }),

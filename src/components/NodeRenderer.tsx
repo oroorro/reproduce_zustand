@@ -8,6 +8,8 @@ const NodeRenderer = () =>{
         { id: '2', data: { label: '2' } ,type: 'Default'},
         { id: '3', data: { label: '3' }, type: 'ArrayListNode'},
         { id: '6', data: { label: '3' }, type: 'ArrayListNode'},
+        { id: '7', data: { label: '3' }, type: 'ArrayListNode'},
+        { id: '8', data: { label: '3' }, type: 'ArrayListNode'},
         { id: '5',data: { label: 'iterator' }, type: 'IteratorNode'},
         {
           id: '4',
