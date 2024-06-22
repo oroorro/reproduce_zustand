@@ -51,27 +51,36 @@ const createRStore = () => {
             if(!ret && payload.type) set({newlyAddedId: payload.id})
 
 
-            if(!payload.type){
-                const { relations } = get();
-                const newRelations = new Map(relations); // Creating a new Map to ensure reference change
-                const relation = newRelations.get("3-Iterator-Relation") || { nodeId: "nodeId-2", contentForIter: [] };
-                relation.contentForIter = payload;
-                newRelations.set("3-Iterator-Relation", relation);
-                set({ relations: newRelations });
-                console.log("payload typeless");
-            }else{
+            // if(!payload.type){
+            //     const { relations } = get();
+            //     const newRelations = new Map(relations); // Creating a new Map to ensure reference change
+            //     const relation = newRelations.get("3-Iterator-Relation") || { nodeId: "nodeId-2", contentForIter: [] };
+            //     relation.contentForIter = payload;
+            //     newRelations.set("3-Iterator-Relation", relation);
+            //     set({ relations: newRelations });
+            //     console.log("payload typeless");
+            // }else{
+            //     const { relations } = get();
+            //     const newRelationsTest = new Map(relations); // Creating a new Map to ensure reference change
+            //     const relationTest = newRelationsTest.get(`${payload.id}-${payload.type}-Relation`) || { nodeId: "nodeId-2", contentForIter: [] };
+            //     relationTest.contentForIter = payload.data;
+            //     newRelationsTest.set(`${payload.id}-${payload.type}-Relation`, relationTest);
+            //     set({ relations: newRelationsTest });
+            //     console.log("payload typed");
+            // }
+
+            if(payload.type){
+            
                 const { relations } = get();
                 const newRelationsTest = new Map(relations); // Creating a new Map to ensure reference change
-                const relationTest = newRelationsTest.get(`${payload.id}-${payload.type}-Relation`) || { nodeId: "nodeId-2", contentForIter: [] };
+                const relationTest = newRelationsTest.get(`${payload.id}-${payload.type}-Relation`) || { nodeId: "nodeId-2", contentForIter: [], timeFrameId: 0 };
                 relationTest.contentForIter = payload.data;
+                relationTest.timeFrameId = payload.timeFrameId;
                 newRelationsTest.set(`${payload.id}-${payload.type}-Relation`, relationTest);
                 set({ relations: newRelationsTest });
                 console.log("payload typed");
-            }
-            
-            
          
-            
+            }
     
         },
 

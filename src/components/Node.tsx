@@ -21,9 +21,16 @@ type ArrayListManager = {
     TimeFrameArray: string[][],
 }
 
+type IteratorTimeFrame = {
+    nodeId: string,
+    nodeTimeFrameIndex: number
+}
+
 type IteratorManager = {
     relationCount: number,
     managingRelations: string[],
+    currentTimeFrame: number,
+    timeFrame: IteratorTimeFrame[][]
 }
 
 interface ContentLengths {
@@ -57,23 +64,30 @@ const NodeWrapper = ({
         useEffect(()=>{
 
           console.log("ArrayListManager updated in useEffect", ArrayListManager)
-          if(ArrayListManager?.currentTimeFrameIndex === 0){
+        //   if(ArrayListManager?.currentTimeFrameIndex === 0){
+        //     const payload = {
+        //         id: id,
+        //         type: type,
+        //         data: ArrayListManager.TimeFrameArray[0]
+        //     }
+        //     setRelation(payload);
+        //   }else if(ArrayListManager?.currentTimeFrameIndex > 0){
+        //     //const input = contentRef.current?.innerHTML.split(" ") || [];
+        //     const payload = {
+        //         id: id,
+        //         type: type,
+        //         data: ArrayListManager.TimeFrameArray[ArrayListManager.currentTimeFrameIndex]
+        //     }
+        //     setRelation(payload);
+        //   }
+
+          if(ArrayListManager?.currentTimeFrameIndex !== -1){
             const payload = {
                 id: id,
                 type: type,
-                data: ArrayListManager.TimeFrameArray[0]
+                data: ArrayListManager.TimeFrameArray[ArrayListManager.currentTimeFrameIndex],
+                timeFrameId: ArrayListManager.currentTimeFrameIndex
             }
-            setRelation(payload);
-          }else if(ArrayListManager?.currentTimeFrameIndex > 0){
-            //const input = contentRef.current?.innerHTML.split(" ") || [];
-
-            const payload = {
-                id: id,
-                type: type,
-                data: ArrayListManager.TimeFrameArray[ArrayListManager.currentTimeFrameIndex]
-            }
-
-
             setRelation(payload);
           }
 
@@ -131,11 +145,14 @@ const NodeWrapper = ({
 
 
         //relationCount 
-        console.log("<Iterator 5> rendered");
+        console.log(`<Iterator ${id}> rendered`);
 
         const initIteratorManager:IteratorManager  = {
             relationCount: 0,
-            managingRelations: []
+            //managingRelations: [],
+            managingRelations: [],
+            currentTimeFrame: -1,
+            timeFrame: [[]],
         }
 
         const [iteratorManager, setIteratorManager] = useState<IteratorManager>(initIteratorManager);
@@ -190,17 +207,21 @@ const NodeWrapper = ({
 
 
         const {relationsCount} = useStore(selector, shallow);
-        const contentLengths = useStore(selectorDynamic);
+        const contentLengths = useStore(selectorDynamic,shallow);
 
         useEffect(()=>{
 
             console.log(`<Iterator ${id}> listening to number of relations`, relationsCount);
             if(relationsCount != iteratorManager.relationCount){
                 const newlyAddedId = store.getState().newlyAddedId;
+
+
                 setIteratorManager(prev=>({
                     ...prev,
                     managingRelations: [...prev.managingRelations , newlyAddedId as string],
                     relationCount: prev.relationCount + 1,
+                    //currentTimeFrame: prev.currentTimeFrame + 1,
+                    // timeFrame: [...prev.timeFrame, ]
                 }))
             }
 
@@ -216,24 +237,85 @@ const NodeWrapper = ({
 
         useEffect(()=>{
 
-            console.log(`<Iterator ${id}> listening to contentLengths`, contentLengths)
+            const {relations} = store.getState()
+            //when each contentLength differs from iteratorManager 
+            // const filteredItems;
+
+            // relations
+
+            // iteratorManager.managingRelations.forEach((nodeID)=>{
+            //     const relation = relations?.get(`${nodeID}-ArrayListNode-Relation`);
+
+            //     relation?.contentForIter
+               
+            // })
+
+
+             //change managingRelations into key[nodeId]: contentLengths
+
+            if(contentLengths && contentLengths.length > 0 && iteratorManager.relationCount > 0){
+                //get Relations by key of iteratorManager.managingRelations  
+                
+
+                const res:IteratorTimeFrame[] = [];
+
+                iteratorManager.managingRelations.forEach((nodeID)=>{
+                    const relation = relations?.get(`${nodeID}-ArrayListNode-Relation`);
+
+                    const obj:IteratorTimeFrame = {
+                          nodeId: nodeID,
+                          nodeTimeFrameIndex: relation?.timeFrameId as number
+                    }
+                    res.push(obj);
+                })
+
+                //get those Relations value which consists timeFrameId  
+               
+                //make an object:IteratorTimeFrame  nodeId, timeFrameId 
+                  //store those into iteratorManager.timeFrame   IteratorTimeFrame
+                  //increase iteratorManager.currentTimeFrame by 1 
+                setIteratorManager(prev=>{
+                    const newTimeFrames = [...prev.timeFrame];
+
+                    if (!newTimeFrames[prev.currentTimeFrame]) {
+                        newTimeFrames[prev.currentTimeFrame] = [];
+                    }
+
+                    newTimeFrames[prev.currentTimeFrame] = [...newTimeFrames[prev.currentTimeFrame], ...res];
+
+                    return{
+                        ...prev,
+                        currentTimeFrame: prev.currentTimeFrame + 1,
+                        timeFrame: newTimeFrames
+                    }
+                    
+                })
+
+            }
+            
+
+            console.log(`<Iterator ${id}> listening to contentLengths`, contentLengths, iteratorManager)
         },[contentLengths])
 
-        const lengthEqualityFn = (prevLength: number, nextLength: number) => {
-            console.log("Relation", prevLength, nextLength)
-            return prevLength === nextLength;
-        }
+
+        //This selector and useEffect was for testing if this iterator could listen to 
+        //3-Iterator-Relation or not 
+
+        // const lengthEqualityFn = (prevLength: number, nextLength: number) => {
+        //     console.log("Relation", prevLength, nextLength)
+        //     return prevLength === nextLength;
+        // }
     
-        const contentForIterLength = useStore(
-            (state) => (state.relations?.get("3-Iterator-Relation")?.contentForIter.length as number),
+        // const contentForIterLength = useStore(
+        //     (state) => (state.relations?.get("3-Iterator-Relation")?.contentForIter.length as number),
             
-        );
+        // );
 
 
-        useEffect(()=>{
+        // useEffect(()=>{
 
-            console.log(`<Iterator ${id}> Listening to 3-Iterator-Relation Length :`, contentForIterLength);
-        },[contentForIterLength])
+        //     console.log(`<Iterator ${id}> Listening to 3-Iterator-Relation Length :`, contentForIterLength);
+        // },[contentForIterLength])
 
 
         return(

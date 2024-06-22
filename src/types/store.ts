@@ -17,8 +17,10 @@ export type ReactFlowStore = {
 
 }
 export type Relations = Map<string, Relation>;
+
 export type Relation = {
     nodeId: string,
+    timeFrameId: number,
     contentForIter: string[],
 }
     
